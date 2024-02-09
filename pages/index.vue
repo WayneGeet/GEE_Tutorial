@@ -6,41 +6,51 @@
 </template>
 
 <script setup>
-import {useMapStore} from "~/store/map"
-const MapStore = useMapStore()
+  import {useMapStore} from "~/store/map"
+  const MapStore = useMapStore()
 
-const map = ref(null)
-onMounted(async () => {
-})
+  const map = ref(null)
 
-const initialize = () => {
-  MapStore.createMap(map.value)
-}
+  onMounted( () => {
+    setInterval(()=> getAuthTokenFromServer(), 3000000)
+    
+  })
+  const initialize = () => {
+      map.value && MapStore.createMap(map.value)
+      MapStore.initDrawingManager(MapStore.map);
 
-const getAuthTokenFromServerAndInitialize = async () => {
-  try {
-    const {data} = await useFetch("http://localhost:5000/getAuthToken/")
-    const token = await data.value
-    const tokenArr = token.token.split(" ")
-    window.ee.data.setAuthToken("", "Bearer", tokenArr[1],3600, [], undefined, false)   
-    window.ee.initialize(null, null, () => initialize())
-  } catch (e) {
-    console.error("error has occured", e )
+    }
+
+  const getAuthTokenFromServerAndInitialize = async () => {
+    try {
+      const { data } = await useFetch("/api/getToken/");
+      if (data && data.value && data.value.token) {
+        const token = data.value.token; // Assuming this is the correct path
+        const tokenArr = token.split(" ");
+        window.ee.data.setAuthToken("", "Bearer", tokenArr[1],3600, [], undefined, false)   
+        window.ee.initialize(null, null, () => initialize())
+      } else {
+        console.error("Missing or invalid data from API response");
+      }
+    } catch (e) {
+      console.error("Error fetching token:", e);
+      // Handle errors appropriately
+    }
+  };
+  const getAuthTokenFromServer = async () => {
+    try {
+      const {data} = await useFetch("/api/getToken/")
+      const token =  data.value
+      const tokenArr = token.split(" ")
+      window.ee.data.setAuthToken("", "Bearer", tokenArr[1],3600, [], undefined, false)   
+    } catch (e) {
+      console.error("error has occured", e )
+    }
   }
-}
-await getAuthTokenFromServerAndInitialize()
+  getAuthTokenFromServerAndInitialize()
 
-const getAuthTokenFromServer = async () => {
-  try {
-    const {data} = await useFetch("http://localhost:5000/getAuthToken/")
-    const token = await data.value
-    const tokenArr = token.token.split(" ")
-    window.ee.data.setAuthToken("", "Bearer", tokenArr[1],3600, [], undefined, false)   
-  } catch (e) {
-    console.error("error has occured", e )
-  }
-}
-await getAuthTokenFromServer()
+
+
 </script>
 
 <style scoped>

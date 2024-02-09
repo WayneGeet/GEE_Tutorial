@@ -58,5 +58,4 @@ export default defineNuxtConfig({
   // serverMiddleware: [
   //   { path: "/ee-api", handler: "~/server-middleware/index.js" },
   // ],
-  ssr:true
 })

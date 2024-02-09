@@ -2,8 +2,8 @@ export default defineEventHandler(async (event) => {
   try {
     const response = await fetch("http://127.0.0.1:5000/getAuthToken/");
     if (response.status === 200) {
-      console.log(response, " this is from express");
-      return { token: response };
+      const token = await response.json();
+      return { token: token.authToken };
     } else {
       return { message: "something went wrong" };
       // Handle other response statuses appropriately
