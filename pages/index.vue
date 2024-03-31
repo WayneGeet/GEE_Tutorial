@@ -1,54 +1,63 @@
 <template>
   <div>
-      <h2>Google Earth Engine w Nuxt 3</h2>
-      <div ref="map" class="w-full max-h-full h-screen"></div>
+      <button @click="addImage">Google Earth Engine w Nuxt 3</button>
+      <div ref="mapRef" class="w-full max-h-full h-screen"></div>
   </div>
 </template>
 
 <script setup>
   import {useMapStore} from "~/store/map"
+  import {useAuth} from "~/store/auth"
+  import {useEe} from "~/store/ee"
   const MapStore = useMapStore()
+  const AuthStore = useAuth()
+  const EeStore = useEe()
 
+  const mapRef = ref(null)
   const map = ref(null)
 
   onMounted( () => {
-    setInterval(()=> getAuthTokenFromServer(), 3000000)
+    const map_id = useRuntimeConfig().public.mapId;
+    // map.value = new window.google.maps.Map(mapRef.value, {
+    //   center: { lat: -0.03, lng: 36 },
+    //   zoom: 8,
+    //   scaleControl: false,
+    //   streetViewControl: false,
+    //   mapTypeControl: false,
+    //   mapId: map_id,
+    // });
+
+    // const pinElement = new window.google.maps.marker.PinElement({
+    //   scale: 1.5,
+    //   background: "#FBBC04",
+    //   borderColor: "#137333",
+    //   glyphColor: "yellow",
+    // });
+    // const marker = new window.google.maps.marker.AdvancedMarkerElement({
+    //   map:map.value,
+    //   position: {lat: -0.03, lng: 36 },
+    //   content: pinElement.element,
+    // });
+
+    // authentication
+    initialize()
     
   })
   const initialize = () => {
-      map.value && MapStore.createMap(map.value)
+      MapStore.createMap(mapRef.value)
       MapStore.initDrawingManager(MapStore.map);
-
+      // EeStore.addSentinel()
     }
 
-  const getAuthTokenFromServerAndInitialize = async () => {
-    try {
-      const { data } = await useFetch("/api/getToken/");
-      if (data && data.value && data.value.token) {
-        const token = data.value.token; // Assuming this is the correct path
-        const tokenArr = token.split(" ");
-        window.ee.data.setAuthToken("", "Bearer", tokenArr[1],3600, [], undefined, false)   
-        window.ee.initialize(null, null, () => initialize())
-      } else {
-        console.error("Missing or invalid data from API response");
-      }
-    } catch (e) {
-      console.error("Error fetching token:", e);
-      // Handle errors appropriately
-    }
-  };
-  const getAuthTokenFromServer = async () => {
-    try {
-      const {data} = await useFetch("/api/getToken/")
-      const token =  data.value
-      const tokenArr = token.split(" ")
-      window.ee.data.setAuthToken("", "Bearer", tokenArr[1],3600, [], undefined, false)   
-    } catch (e) {
-      console.error("error has occured", e )
-    }
+  AuthStore.getAuthTokenFromServerAndInitialize()
+  !process.server && setInterval(()=> AuthStore.getAuthTokenFromServer(), 100000)
+
+  const addImage = () => {
+    const polygon = convertPathToPolygon(MapStore.drawnPath)
+    console.log(polygon)
+    const geom = ee.Geometry.Polygon([convertPathToPolygon(MapStore.drawnPath)])
+    EeStore.addSentinel(geom, MapStore.map)
   }
-  getAuthTokenFromServerAndInitialize()
-
 
 
 </script>

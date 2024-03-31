@@ -22,7 +22,7 @@ export default defineNuxtConfig({
         defer: true,
       },
       {
-        src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAP_API_KEY}&callback=Function.prototype&libraries=drawing`,
+        src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAP_API_KEY}&callback=Function.prototype&libraries=marker,drawing`,
 
       },
       {
@@ -53,6 +53,13 @@ export default defineNuxtConfig({
   ]],
   css: ['~/assets/css/main.css',
   ],
+  runtimeConfig:{
+    public:{
+      mapId:process.env.MAP_ID,
+      apiKey:process.env.GOOGLE_MAP_API_KEY,
+      projectPath:process.env.GEE_PROJECT_ASSET_PATH
+    }
+  }
   // debug:true,
    
   // serverMiddleware: [
