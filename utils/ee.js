@@ -3,9 +3,6 @@ import {
   BUFFER,
   NIR_DRK_THRESH,
   CLD_PRJ_DIST,
-  CLOUD_FILTER,
-  START_DATE,
-  END_DATE,
 } from "~/assets/cloud_k";
 // 😂😂😂You play too much my boy
 
@@ -89,4 +86,11 @@ export const addCldShdwMask = (img) => {
 
   //  Add the final cloud-shadow mask to the image.
   return img.addBands(is_cld_shdw);
+};
+
+export const applyCldShdwMask = (img) => {
+  // Subset the cloudmask band and invert it so clouds/shadow are 0, else 1.
+  const not_cld_shdw = img.select("cloudmask").not();
+  // Subset reflectance bands and update their masks, return the result.
+  return img.select("B.*").updateMask(not_cld_shdw);
 };

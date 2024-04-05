@@ -47,31 +47,22 @@ export const useEe = defineStore("ee", () => {
     embeddedMap.overlayMapTypes.push(overlay);
   }
 
-  function displayCloudLayers(col, map) {
+  function displayCloudLayers(col, map, vizParams) {
     // # Mosaic the image collection.
     const img = col.mosaic();
-    console.log("this is img.mosaic()", img);
+    console.log("this is img.mosaic()", img.getInfo());
     // # Subset layers and prepare them for display.
-    const clouds = img.select("clouds").selfMask();
-    const shadows = img.select("shadows").selfMask();
-    const dark_pixels = img.select("dark_pixels").selfMask();
-    const probability = img.select("probability");
-    const cloudmask = img.select("cloudmask").selfMask();
-    const cloud_transform = img.select("cloud_transform");
-    addEeLayer(
-      img,
-      {
-        bands: ["B4", "B3", "B2"],
-        min: 0,
-        max: 2500,
-        gamma: 1.1,
-      },
-      map
-    );
-    addEeLayer(clouds, { palette: "e056fd" }, map);
-    addEeLayer(shadows, { palette: "yellow" }, map);
-    addEeLayer(probability, { min: 0, max: 100 }, map);
-    addEeLayer(dark_pixels, { palette: "orange" }, map);
+    // const clouds = img.select("clouds").selfMask();
+    // const shadows = img.select("shadows").selfMask();
+    // const dark_pixels = img.select("dark_pixels").selfMask();
+    // const probability = img.select("probability");
+    // const cloudmask = img.select("cloudmask").selfMask();
+    // const cloud_transform = img.select("cloud_transform");
+    addEeLayer(img, vizParams, map);
+    // addEeLayer(clouds, { palette: "e056fd" }, map);
+    // addEeLayer(shadows, { palette: "yellow" }, map);
+    // addEeLayer(probability, { min: 0, max: 100 }, map);
+    // addEeLayer(dark_pixels, { palette: "orange" }, map);
   }
 
   return {
@@ -80,5 +71,6 @@ export const useEe = defineStore("ee", () => {
     getS2SrCldCol,
     displayCloudLayers,
     displayCloudLayers,
+    addEeLayer,
   };
 });

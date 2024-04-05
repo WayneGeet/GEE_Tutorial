@@ -1,10 +1,10 @@
 <template>
-  <div class="relative h-screen flex flex-col">
-    <div class="absolute z-10 ">
+  <div class="relative">
+    <div class="z-10 ">
       <button @click="addImage" class="z-50 px-7 py-3 bg-orange-400 hover:bg-orange-500 text-white">Show EE Layer</button>
     </div>
     
-    <div ref="mapRef" class="w-full max-h-full  absolute top-0 right-0 left-0 bottom-0 z-10"></div>
+    <div ref="mapRef" class="h-screen"></div>
   </div>
 </template>
 
@@ -34,7 +34,8 @@
   // 2. initialize map
   const createMap = (mapRef) => {
     map.value = new window.google.maps.Map(mapRef, {
-      center: { lat: -0.03, lng: 36 },
+      // -7.406522, 146.298661
+      center: { lat: -7.406522, lng: 146.298661 },
       zoom: 8,
       scaleControl: false,
       streetViewControl: false,
@@ -74,14 +75,28 @@
   };
   // 4. add Image to map
   const addImage = () => {
+    try {
     const polygon = convertPathToPolygon(MapStore.drawnPath)
     console.log(polygon)
     const geom = ee.Geometry.Polygon([convertPathToPolygon(MapStore.drawnPath)])
     // EeStore.addSentinel(geom, map.value)
     // s2_sr_cld_col_eval_disp = s2_sr_cld_col_eval.map(add_cld_shdw_mask)
-    const s2SrCldColEval = EeStore.getS2SrCldCol(geom, "2022-01-01", "2022-01-20")
-    const col = s2SrCldColEval.map(addCldShdwMask)
-    EeStore.displayCloudLayers(col, map.value)
+    const s2SrCldColEval = EeStore.getS2SrCldCol(geom, "2022-06-01", "2022-09-01")
+    const col = s2SrCldColEval.map(addCldShdwMask).map(applyCldShdwMask)
+    // console.log(col.mosaic().getInfo())
+    const mapId = col.mosaic().clip(geom).getMap({'bands': ['B4', 'B3', 'B2'], 'min': 0, 'max': 2500, 'gamma': 1.1})
+    console.log(col.mosaic().clip(geom).getInfo())
+    const tileSource = new ee.layers.EarthEngineTileSource(mapId);
+    const overlay = new ee.layers.ImageOverlay(tileSource);
+    map.value.overlayMapTypes.push(overlay);
+        
+  } catch (error) {
+      console.error("something went wrong:", error)
+    }
+
+
+    // EeStore.displayCloudLayers(col, map.value, {bands: ['B4', 'B3', 'B2'], min: 0, max: 2500, gamma: 1.1})
+    // EeStore.addEeLayer(col.mosaic(), {}, map.value)
   }
 
 
