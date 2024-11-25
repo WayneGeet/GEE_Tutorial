@@ -1,33 +1,31 @@
-import { getUserDrawnPolygonOptions } from "~/assets/drawing/drawingOpions";
+import {
+  getUserDrawnPolygonOptions,
+  splitOptions,
+  mapOptions,
+} from "~/assets/options/map";
 import { defineStore } from "pinia";
 
 export const useMapStore = defineStore("map", () => {
   const map = ref(null);
   const drawingManager = ref(null);
-  const map_id = useRuntimeConfig().public.mapId;
+  const mapId = useRuntimeConfig().public.mapId;
   const drawnPath = ref([]);
   const drawnPolygon = ref(null);
 
-  const createMap = (mapRef) => {
-    map.value = new window.google.maps.Map(mapRef, {
-      center: { lat: -0.03, lng: 36 },
-      zoom: 8,
-      scaleControl: false,
-      streetViewControl: false,
-      mapTypeControl: false,
-      mapId: map_id,
+  const initializeMap = (...refs) => {
+    let map1, map2, split;
+    map1 = new window.google.maps.Map(refs[0], { ...mapOptions, mapId });
+    map2 = new window.google.maps.Map(refs[1], {
+      ...mapOptions,
+      mapId,
     });
-    map.value.addListener("tilesloaded", (e) => {
-      console.log("tiles loaded");
-      const advancedMarker = addMarker(map.value);
-      console.log("advanced marker", advancedMarker);
-    });
-    map.value.addListener("idle", (e) => {
-      console.log("map idle");
-    });
+    syncMaps(map1, map2);
+    split = window.Split(["#left", "#right"], splitOptions);
+
+    return { map1, map2, split };
   };
 
-  const initDrawingManager = () => {
+  const initDrawingManager = (mapLeft) => {
     console.log("start drawing");
     drawingManager.value = new window.google.maps.drawing.DrawingManager({
       drawingMode: window.google.maps.drawing.OverlayType.POLYGON,
@@ -44,12 +42,12 @@ export const useMapStore = defineStore("map", () => {
       function (e) {
         if (e.type === "polygon") {
           drawnPath.value = e.overlay.getPath().getArray();
-          drawnPolygon.value = createPolygon(drawnPath.value, map.value);
+          drawnPolygon.value = createPolygon(drawnPath.value, mapLeft);
         }
       }
     );
 
-    drawingManager.value.setMap(map.value);
+    drawingManager.value.setMap(mapLeft);
   };
 
   const addMarker = (map) => {
@@ -59,14 +57,14 @@ export const useMapStore = defineStore("map", () => {
       borderColor: "#137333",
       glyphColor: "yellow",
     });
-    const marker = new window.google.maps.marker.AdvancedMarkerElement({
+    const marker = new window.google.maps.Marker({
       map,
-      position: map.getCenter(),
-      content: pinElement.element,
+      position: { lat: -0.277021, lng: 36.125151 },
+      // content: pinElement.element,
     });
 
     return marker;
   };
 
-  return { createMap, map, initDrawingManager, addMarker, drawnPath };
+  return { initializeMap, map, initDrawingManager, addMarker, drawnPath };
 });

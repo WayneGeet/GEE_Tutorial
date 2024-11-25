@@ -29,6 +29,12 @@ export default defineNuxtConfig({
         src: "https://ajax.googleapis.com/ajax/libs/earthengine/0.1.343/earthengine-api.min.js",
         // https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
       },
+      {
+        src: "https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"
+      },
+      {
+        src: "https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"
+      }
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
   },

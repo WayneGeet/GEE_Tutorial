@@ -17,6 +17,9 @@ dependencies:
   googleapis:
     specifier: ^131.0.0
     version: 131.0.0
+  nuxt-storage:
+    specifier: ^1.2.2
+    version: 1.2.2
   pinia:
     specifier: ^2.1.7
     version: 2.1.7(vue@3.4.15)
@@ -4871,6 +4874,10 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
+
+  /nuxt-storage@1.2.2:
+    resolution: {integrity: sha512-quJbZ87NO7QRCSp7YZolot6VwktciSLuTS/sRl8NPz5rAWA84U5Py0y9FmAsbKTiaqJtFcCKSaJGzky948jA3w==}
+    dev: false
 
   /nuxt@3.10.0(vite@5.0.12):
     resolution: {integrity: sha512-E9GWyrzTvkoHoJOT847EASEl8KcGDF1twcBgUzDMuNIx+llZ14F+q+XbTjHzYM/o2hqHTer0lLt2RUn5wsBLQQ==}

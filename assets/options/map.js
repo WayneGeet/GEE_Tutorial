@@ -1,3 +1,11 @@
+export const mapOptions = {
+  center: { lat: 5.241351, lng: 96.089679 },
+  zoom: 8,
+  scaleControl: false,
+  streetViewControl: false,
+  mapTypeControl: false,
+};
+
 export const rectangleOptions = {
   fillColor: "#ededf4",
   fillOpacity: 1,
@@ -21,4 +29,13 @@ export const getUserDrawnPolygonOptions = {
   strokeWeight: 2,
   fillColor: "#FF0000",
   fillOpacity: 0.0,
+};
+
+export const splitOptions = {
+  sizes: [25, 75],
+  minSize: 0,
+  expandToMin: true,
+  gutterSize: 12,
+  snapOffset: 100,
+  cursor: "col-resize",
 };

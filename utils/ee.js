@@ -4,8 +4,7 @@ import {
   NIR_DRK_THRESH,
   CLD_PRJ_DIST,
 } from "~/assets/cloud_k";
-// 😂😂😂You play too much my boy
-
+/* 1. Using qa band */
 // export const maskS2clouds = (image) => {
 //   var qa = image.select('QA60');
 
@@ -19,6 +18,7 @@ import {
 
 //   return image.updateMask(mask).divide(10000);
 // }
+/* 2. Using s2cloudless */
 export const addCloudBands = (img) => {
   //  Get s2cloudless image, subset the probability band.
   const cld_prb = ee.Image(img.get("s2cloudless")).select("probability");
@@ -93,4 +93,42 @@ export const applyCldShdwMask = (img) => {
   const not_cld_shdw = img.select("cloudmask").not();
   // Subset reflectance bands and update their masks, return the result.
   return img.select("B.*").updateMask(not_cld_shdw);
+};
+/*3. Using community based code from thanh... */
+//Function to score shadows based on clouds
+function projectShadows(cloudMask, sunAzimuth, offset) {
+  const azimuth = ee
+    .Number(sunAzimuth)
+    .multiply(Math.PI)
+    .divide(180.0)
+    .add(ee.Number(0.5).multiply(Math.PI));
+  const x = azimuth.cos().multiply(10.0).round();
+  const y = azimuth.sin().multiply(10.0).round();
+  const shadow = cloudMask.changeProj(
+    cloudMask.projection(),
+    cloudMask
+      .projection()
+      .translate(x.multiply(ee.Number(offset)), y.multiply(ee.Number(offset)))
+  );
+  return shadow;
+}
+
+//Function to detect clouds and shadows
+export const clds3 = function (image) {
+  const cld = image.select("B2").multiply(image.select("B9")).divide(1e4);
+  const cloud = cld.gt(310);
+  const scale = ee.Image.pixelArea().sqrt();
+  const buffer = cloud
+    .updateMask(cloud)
+    .fastDistanceTransform(250, "pixels")
+    .sqrt()
+    .multiply(scale);
+  const clouds = cloud.not().updateMask(buffer.gt(250));
+  const shadows = projectShadows(
+    clouds,
+    image.get("MEAN_SOLAR_AZIMUTH_ANGLE"),
+    7.5
+  );
+  const locmay = image.mask().reduce("min").and(clouds).and(shadows);
+  return image.updateMask(locmay);
 };
